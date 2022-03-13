@@ -25,9 +25,9 @@ Enter into the repo
 $ cd audio-speed
 ```
 
-Run the setup script, providing the API auth key from [Assembly AI]('assemblyai.com')
+Run the setup script `script.sh`, providing the API auth key from [Assembly AI]('assemblyai.com')
 ```commandline
-audio-speed$ ./script <auth-key>
+audio-speed$ ./script.sh <auth-key>
 ```
 
 Now your environment is setup with the right dependencies and the authentication key is setup in
