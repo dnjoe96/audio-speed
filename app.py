@@ -2,9 +2,9 @@
 import os
 import click
 import requests
+from time import sleep
 
-# eventually, I would have to call getenv from the environment
-# auth_key = '782ad5e3c67d4aaa9844057332d0591e'
+
 auth_key = os.environ.get('AUTH_KEY')
 endpoint = "https://api.assemblyai.com/v2/transcript"
 
@@ -103,6 +103,7 @@ def get_result(_id, status):
         exit(1)
 
     while status not in ['completed', 'error']:
+        sleep(5)
         print(status)
         response = requests.get(endpoint, headers=headers)
         status = response.json()['status']
@@ -138,7 +139,16 @@ def getspeed(file):
         res = response.json()['error']
     else:
         res = get_result(response.json()['id'], response.json()['status'])
-    click.echo(res)
+    # click.echo(res)
+
+    speed = res[0] / (res[1] / 60)
+    click.echo('speed is = {:.2f}'.format(float(speed)))
+    if speed > 160:
+        click.echo("Too fast")
+    elif speed < 120:
+        click.echo("Too slow")
+    else:
+        click.echo("Speed ok")
 
 
 if __name__ == '__main__':
