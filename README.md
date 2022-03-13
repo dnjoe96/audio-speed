@@ -9,23 +9,23 @@ Greater than 160 words per minute is too fast, and less than 120 is too slow.
 This application ia a terminal application.
 Therefore, in order to run this application, this repository has to be cloned to your local machine.
 ---
-Requirements
+### Requirements
 - ubuntu/redhat
 - python3
 
 ---
 
-clone repo
+Clone repo
 ```commandline
 $ git clone git@github.com:dnjoe96/audio-speed.git
 ```
 
-enter into the repo
+Enter into the repo
 ```commandline
 $ cd audio-speed
 ```
 
-run the setup script, providing the API auth key from [Assembly AI]('assemblyai.com')
+Run the setup script, providing the API auth key from [Assembly AI]('assemblyai.com')
 ```commandline
 audio-speed$ ./script <auth-key>
 ```
@@ -39,7 +39,7 @@ Now you can run the script
 ```commandline
 audio-speed$ ./app.py -f <path to audio file>
 ```
-example
+example : -
 ```commandline
 audio-speed$ ./app.py -f audiofolder/media.mp3
 ```
@@ -48,7 +48,7 @@ or
 ```commandline
 audio-speed$ ./app.py -f <url of audio file>
 ```
-example
+example: -
 ```commandline
 audio-speed$ ./app.py -f https://facebook.com/some-audo-file
 ```
@@ -103,3 +103,7 @@ speed =  length-of-words / audio-duration
 For more information on the modules and API used, here are some resources.
 - [Assembly AI docs](https://docs.assemblyai.com/)
 - [Click python module](https://click.palletsprojects.com/en/8.0.x/quickstart/)
+
+
+---
+AUTHOR: [Joseph Emmanuel](https://github.com/dnjoe96) || [Linkedin](https://www.linkedin.com/in/joseph-emmanuel-i/)
