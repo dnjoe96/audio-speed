@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+import os
 import click
-import json
 import requests
 
 # eventually, I would have to call getenv from the environment
-auth_key = '782ad5e3c67d4aaa9844057332d0591e'
+# auth_key = '782ad5e3c67d4aaa9844057332d0591e'
+auth_key = os.environ.get('AUTH_KEY')
 endpoint = "https://api.assemblyai.com/v2/transcript"
 
 headers = {
@@ -14,6 +15,11 @@ headers = {
 
 
 def is_link(string):
+    """
+        function to check if a string is a url link
+    :param string:
+    :return: Boolean - True or False
+    """
     if string is None:
         return False
     if 'http://' in string or 'https://' in string:
@@ -23,27 +29,55 @@ def is_link(string):
 
 
 def read_file(filename):
-    with open(filename, 'rb') as _file:
-        while True:
-            data = _file.read(5242880)
-            if not data:
-                break
-            yield data
+    """
+        Reads a file and returns the output as a stream
+    :param filename:
+    :return: stream
+    """
+    try:
+        with open(filename, 'rb') as _file:
+            while True:
+                data = _file.read(5242880)
+                if not data:
+                    break
+                yield data
+    except FileNotFoundError as e:
+        print(e)
+        exit(1)
 
 
 def link_handler(link):
+    """
+        Using the audio link, this functions makes a call to the
+        transcript API
+    :param link:
+    :return: Http response
+    """
     json = {
         "audio_url": link
     }
-    response = requests.post(endpoint, json=json, headers=headers)
+
+    try:
+        response = requests.post(endpoint, json=json, headers=headers)
+    except Exception as e:
+        print(e)
+        exit(1)
+
     print('url posted')
-    return response.json()
+    # print(response.status_code)
+    return response
 
 
 def media_file_handler(file):
-    # with this url, we upload audio file
+    """
+        The function uploads a media file into the Assembly AI Upload API
+    :param file:
+    :return: http response
+    """
     upload_response = requests.post('https://api.assemblyai.com/v2/upload', headers=headers,
-                                    data=read_file('test_audio.mp3'))
+                                    data=read_file(file))
+    if upload_response.status_code != 200:
+        return upload_response
     print('file uploaded')
     audio_url = upload_response.json()["upload_url"]
 
@@ -51,16 +85,31 @@ def media_file_handler(file):
 
 
 def get_result(_id, status):
+    """
+        This function checks the result after the API transcription
+        for error or completion
+    :param _id: if of the transcript json responnse
+    :param status: status of the transcription
+    :return: Tuple - word count and audio duration
+    """
+    # print('processing')
     headers = {"authorization": auth_key}
     endpoint = "https://api.assemblyai.com/v2/transcript/{}".format(_id)
-    response = requests.get(endpoint, headers=headers)
 
-    print('processing .', end="")
-    while status != 'completed':
-        print('.', end="")
+    try:
+        response = requests.get(endpoint, headers=headers)
+    except Exception as e:
+        print(e)
+        exit(1)
+
+    while status not in ['completed', 'error']:
+        print(status)
         response = requests.get(endpoint, headers=headers)
         status = response.json()['status']
-    print('\ndone')
+    print('done')
+
+    if status == 'error':
+        return response.json()['error']
     return len(response.json()['words']), response.json()['audio_duration']
 
 
@@ -75,7 +124,6 @@ _help = 'pass audio file in the format\n' \
 
 
 @click.command()
-# @click.argument('audio_file')
 @click.option('-f', '--file', default=None, help=_help)
 def getspeed(file):
     if file is None:
@@ -86,7 +134,10 @@ def getspeed(file):
     else:
         response = media_file_handler(file)
 
-    res = get_result(response['id'], response['status'])
+    if response.status_code != 200:
+        res = response.json()['error']
+    else:
+        res = get_result(response.json()['id'], response.json()['status'])
     click.echo(res)
 
 
